@@ -1,5 +1,5 @@
 {
     "PORT":3000,
-    "DB_URL":"mongodb+srv://hetvi01:mongo_01@backenddb.oe9ottm.mongodb.net/?retryWrites=true&w=majority&appName=backendDB",
+    "DB_URL":"mongodb+srv://hetvi01:mongo_01@backenddb.oe9ottm.mongodb.net/Product_Catalog?retryWrites=true&w=majority&appName=backendDB",
     "SECRETKEY":"HETVIPAREKH"
 }

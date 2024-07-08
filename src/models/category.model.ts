@@ -5,6 +5,10 @@ const CategorySchema = new mongoose.Schema({
         type:String,
         required:[true,'Title is required']
     },
+    description:{
+        type:String,
+        required:[true,'description is required']
+    },
 },{
     timestamps:true
 })

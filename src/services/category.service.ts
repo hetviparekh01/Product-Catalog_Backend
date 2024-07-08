@@ -9,7 +9,7 @@ export class CategoryService{
         try {
             const response=await Category.create(categoryData)
             if(response){
-                return {status:true,statusCode:200,content:"CATEFORY ADDED SUCESSFULLY"}
+                return {status:true,statusCode:200,content:"CATEGORY ADDED SUCESSFULLY"}
             }else{
                 throw new ApiError(500,"ERROR IN ADDING THE CATEGORY")
             } 

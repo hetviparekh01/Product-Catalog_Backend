@@ -6,12 +6,12 @@ import { CategoryService } from "../services/category.service";
 import { TYPES } from "../types/TYPE";
 
 
-@controller('/category',)
+@controller('/category',TYPES.AuthMiddleware)
 export class CategoryController{
     constructor(
         @inject<CategoryService>(TYPES.CategoryService) private categoryService:CategoryService
     ){}
-    @httpPost('/addcatogory',TYPES.RoleMiddleware)
+    @httpPost('/addcategory',TYPES.RoleMiddleware)
     async addCategory(req:Request,res:Response){
         try {
             const categoryData = req.body;

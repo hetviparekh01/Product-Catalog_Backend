@@ -22,7 +22,7 @@ export class AuthMiddleware extends BaseMiddleware {
             return res.json({status:false,message:"USER IS NOT LOGGED IN"});
         }
         try {
-            const decoded=jwt.verify(token,config.get("secretKey") as string)
+            const decoded=jwt.verify(token,config.get("SECRETKEY") as string)
             req.user=(decoded as Token);
             const userId=req.user.userId;
             const user=await User.findById(userId)

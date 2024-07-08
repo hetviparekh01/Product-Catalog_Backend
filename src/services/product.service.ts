@@ -55,9 +55,40 @@ export class ProductService{
             return {status:false,statusCode:error.statusCode || 500,content:error.message}
         }
     }
-    async getAllProducts(search:string){
+    async getAllProducts(queryParams:any){
         try {
-            const response=await Product.find({})
+            const dynamicQuery={
+                $match:{}
+            }
+            let filterArray=[
+               ...( queryParams.category ? [{"categoryDetails.categoryName":queryParams.category}] :[]),
+               ...( queryParams.price ? [{"price":Number(queryParams.price)}] :[])
+            ];
+
+            let searchArray=[
+                ...( queryParams.title ? [{"title":{$regex:queryParams.title,$options:"i"}}] :[]),
+               ...( queryParams.description ? [{"description":{$regex:queryParams.description,$options:"i"}}] :[])
+            ];
+
+           filterArray.length>0 ? dynamicQuery.$match={...dynamicQuery.$match,$and:filterArray}:null;
+           searchArray.length>0 ? dynamicQuery.$match={...dynamicQuery.$match,$or:searchArray}:null;
+
+            const response=await Product.aggregate([
+                {
+                  $lookup: {
+                    from: "categories",
+                    localField: "categoryId",
+                    foreignField: "_id",
+                    as: "categoryDetails"
+                  }
+                },
+                {
+                  $unwind: {
+                    path: "$categoryDetails",
+                  }
+                },
+                dynamicQuery
+              ])
             if(response){
                 return {status:true,statusCode:200,content:response}
             }else{

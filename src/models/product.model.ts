@@ -23,7 +23,7 @@ const ProductSchema = new mongoose.Schema({
         ref:'category'
     },
 },{
-    timestamps:true
+    timestamps:true 
 })
 
 const Product = mongoose.model('product',ProductSchema)

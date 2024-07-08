@@ -36,11 +36,12 @@ import { injectable } from "inversify";
                     email:user.email,
                     role:user.role
                 }
-                const token=await jwt.sign(payload,config.get("secretKey") as string,{expiresIn:'24h'})  
+                const token=await jwt.sign(payload,config.get("SECRETKEY") as string,{expiresIn:'24h'})  
                 const response={
                     name:user.name,
                     role:user.role,
                     accessToken:token,
+                    message:"USER LOGGED IN SUCCESSFULLY"
                 }
                 return {status:true,statusCode:200,content:response}
             } catch (error:any) {

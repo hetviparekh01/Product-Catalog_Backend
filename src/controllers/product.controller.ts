@@ -1,104 +1,122 @@
 import { NextFunction, Request, Response } from "express";
 import { controller, httpDelete, httpGet, httpPost, httpPut } from "inversify-express-utils";
-import { responseMessage, TYPES } from "../constants";
-import { errorHandler } from "../utils";
 import { inject } from "inversify";
-import { ProductService } from "../services";
-import { IPRODUCTS } from "../interfaces";
-import multer from "multer";
-import path from 'path'
-const storageConfig = multer.diskStorage({
-    destination: path.join(__dirname, "../public/"),
-    filename: (req, file, res) => {
-            const randomValue = Date.now()
-            req.body.imagePath = path.join("/public/"+ randomValue + file.originalname)
-            res(null, randomValue + file.originalname)
-    }
-})
-const upload = multer(
-    {
-        storage: storageConfig,
-        limits:{files:1},
-        fileFilter:(req, file, callback)=> {
-            if (!req.body.title || !req.body.description || !req.body.price || !req.body.categoryId) {
-                callback(null,false)
-            }else{
-                callback(null,true)
-            }
-        },
-    }
-)
-const multerErrorHandling = (err:any, req:Request, res:Response, next:NextFunction) => {
-    if (err instanceof multer.MulterError) {
-      res.status(400).send("Multer error: " + err.message);
-    } else {
-      next();
-    }
-    };
+import { upload } from "../middlewares/multer.middleware";
+import { ProductService } from "../services/product.service";
+import { IPRODUCTS } from "../interfaces/IProduct";
+import { TYPES } from "../types/TYPE";
+
 @controller('/product',TYPES.AuthMiddleware)
 export class ProductController{
     constructor(
         @inject<ProductService>(TYPES.ProductService) private productService:ProductService
     ){}
 
-    @httpPost('/',TYPES.RoleMiddleware,upload.single('image'),multerErrorHandling)
-    async addProduct(req:Request,res:Response):Promise<void>{
+    @httpPost('/addproduct',TYPES.RoleMiddleware,upload.single('imagePath'))
+    async addProduct(req:Request,res:Response){
         try {
-            const {title,description,price,imagePath,categoryId} = req.body as IPRODUCTS
-            await this.productService.addProduct({title,description,price,imagePath,categoryId})
-            res.json({status:true,statusCode:201,message:"Product Added"})
-        } catch (error) {
-            const response = errorHandler(error)
-            res.json({status:false,...response})
+
+            let productData= req.body;
+            productData.imagePath=req.file?.filename
+            const response =await this.productService.addProduct(productData)
+            if (response.status) {
+              return res
+                .status(response.statusCode)
+                .json({ status: response.status, content: response.content });
+            } else {
+              return res
+                .status(response.statusCode)
+                .json({ status: false, content: response.content });
+            }
+        } catch (error:any) {
+            return res
+            .status(error.statusCode)
+            .json({ status: false, content: error.message });
         }
     }
 
-    @httpGet('/:id')
-    async getParticularProduct(req:Request,res:Response):Promise<void>{
+    @httpGet('/getproductbyid/:id')
+    async getParticularProduct(req:Request,res:Response){
         try {
             const {id} = req.params
-            
-            const data:IPRODUCTS[] = await this.productService.getProductById(id as string)
-            res.json({status:true,statusCode:201,data})
-        } catch (error) {
-            const response = errorHandler(error)
-            res.json({status:false,...response})
+            const response =await this.productService.getProductById(id as string)
+            if (response.status) {
+              return res
+                .status(response.statusCode)
+                .json({ status: response.status, content: response.content });
+            } else {
+              return res
+                .status(response.statusCode)
+                .json({ status: false, content: response.content });
+            }
+        } catch (error:any) {
+            return res
+            .status(error.statusCode)
+            .json({ status: false, content: error.message });
         }
     }
 
-    @httpPut('/:id',TYPES.RoleMiddleware,upload.single('image'),multerErrorHandling)
-    async updateProduct(req:Request,res:Response):Promise<void>{
+    @httpPut('/updateproduct/:id',TYPES.RoleMiddleware,upload.single('image'))
+    async updateProduct(req:Request,res:Response){
         try {
             const {id} = req.params
-            const {title,description,price,imagePath,categoryId} = req.body as IPRODUCTS
-            await this.productService.updateProduct(id as string,{title,description,price,imagePath,categoryId})
-            res.json({status:true,statusCode:200,message:"Product Updated"})
-        } catch (error) {
-            const response = errorHandler(error)
-            res.json({status:false,...response})
-        }
-    }
-    @httpDelete('/:id',TYPES.RoleMiddleware)
-    async deleteProduct(req:Request,res:Response):Promise<void>{
-        try {
-            const {id} = req.params
-            await this.productService.deleteProduct(id as string)
-            res.json({status:true,statusCode:200,message:"Product Deleted"})
-        } catch (error) {
-            const response = errorHandler(error)
-            res.json({status:false,...response})
+            const productData = req.body as IPRODUCTS;
+            const response = await this.productService.updateProduct(id as string,productData)
+            if (response.status) {
+              return res
+                .status(response.statusCode)
+                .json({ status: response.status, content: response.content });
+            } else {
+              return res
+                .status(response.statusCode)
+                .json({ status: false, content: response.content });
+            }
+        } catch (error:any) {
+            return res
+            .status(error.statusCode)
+            .json({ status: false, content: error.message });
         }
     }
 
-    @httpGet('/')
-    async getAllProducts(req:Request,res:Response):Promise<void>{
+    @httpDelete('/deleteproduct/:id',TYPES.RoleMiddleware)
+    async deleteProduct(req:Request,res:Response){
         try {
-            const {search} = req.query
-            const data:IPRODUCTS[] = await this.productService.getAllProducts(search as string)
-            res.json({status:true,statusCode:200,data})
-        } catch (error) {
-            const response = errorHandler(error)
-            res.json({status:false,...response})
+            const {id} = req.params;
+            const response =  await this.productService.deleteProduct(id as string)
+            if (response.status) {
+              return res
+                .status(response.statusCode)
+                .json({ status: response.status, content: response.content });
+            } else {
+              return res
+                .status(response.statusCode)
+                .json({ status: false, content: response.content });
+            }
+        } catch (error:any) {
+            return res
+            .status(error.statusCode)
+            .json({ status: false, content: error.message });
+        }
+    }
+
+    @httpGet('/getallproducts')
+    async getAllProducts(req:Request,res:Response){
+        try {
+            const queryParams = req.query;
+            const response = await this.productService.getAllProducts(queryParams)
+            if (response.status) {
+              return res
+                .status(response.statusCode)
+                .json({ status: response.status, content: response.content });
+            } else {
+              return res
+                .status(response.statusCode)
+                .json({ status: false, content: response.content });
+            }
+        } catch (error:any) {
+            return res
+            .status(error.statusCode)
+            .json({ status: false, content: error.message });
         }
     }
 }

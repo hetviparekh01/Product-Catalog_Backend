@@ -4,7 +4,7 @@ import { BaseMiddleware } from "inversify-express-utils";
 export class RoleMiddleware extends BaseMiddleware{
     handler(req: Request, res: Response, next: NextFunction) {
         try {
-            if(req.headers.role === 'Admin'){
+            if(req.user.role === 'Admin'){
                 next()
             }else{
                 throw new Error('Not Authorized')
