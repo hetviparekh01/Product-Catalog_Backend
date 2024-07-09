@@ -3,7 +3,8 @@ import mongoose, { PipelineStage } from "mongoose";
 import { IPRODUCTS } from "../interfaces/IProduct";
 import { Product } from "../models/product.model";
 import { ApiError } from "../utils/APIError";
-
+import fs from 'fs';
+import path from 'path';
 @injectable()
 export class ProductService{
     async addProduct(productData:IPRODUCTS){
@@ -32,6 +33,16 @@ export class ProductService{
     }
     async updateProduct(id:string,productData:IPRODUCTS){
         try {
+
+            const product=await Product.findById(id);
+            if(product){
+                if(productData.imagePath){
+                    fs.unlink(path.join(__dirname,'..','..', 'public', 'uploads', `${product.imagePath}`),
+                    (err => {
+                        if (err) console.log(err);
+                    }));
+                }
+            }
             const response= await Product.findByIdAndUpdate(id,productData)
             if(response){
                 return {status:true,statusCode:200,content:"PRODUCT SUCCESSFULLY UPDATED"}
@@ -44,6 +55,16 @@ export class ProductService{
     }
     async deleteProduct(id:string){
         try {
+            const product=await Product.findById(id);
+            if(product){
+                fs.unlink(path.join(__dirname,'..','..', 'public', 'uploads', `${product.imagePath}`),
+                    (err => {
+                        if (err) console.log(err);
+                        else {
+                            console.log("\nDeleted file");
+                        }
+                    }));    
+            }
             const response=await Product.findByIdAndDelete(id)
             if(response){
                 return {status:true,statusCode:200,content:"PRODUCT SUCCESSFULLY DELETED"}
@@ -66,8 +87,8 @@ export class ProductService{
             ];
 
             let searchArray=[
-                ...( queryParams.title ? [{"title":{$regex:queryParams.title,$options:"i"}}] :[]),
-               ...( queryParams.description ? [{"description":{$regex:queryParams.description,$options:"i"}}] :[])
+                ...( queryParams.search ? [{"title":{$regex:queryParams.search,$options:"i"}}] :[]),
+               ...( queryParams.search ? [{"description":{$regex:queryParams.search,$options:"i"}}] :[])
             ];
 
            filterArray.length>0 ? dynamicQuery.$match={...dynamicQuery.$match,$and:filterArray}:null;

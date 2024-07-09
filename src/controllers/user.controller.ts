@@ -14,7 +14,6 @@ export class AuthController {
         try {
             const userData: IUser = req.body;
             const response = await this.userService.signUp(userData);
-          console.log(response);
           if (response.status) {
             return res
               .status(response.statusCode)

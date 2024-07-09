@@ -56,11 +56,12 @@ export class ProductController{
         }
     }
 
-    @httpPut('/updateproduct/:id',TYPES.RoleMiddleware,upload.single('image'))
+    @httpPut('/updateproduct/:id',TYPES.RoleMiddleware,upload.single('imagePath'))
     async updateProduct(req:Request,res:Response){
         try {
             const {id} = req.params
-            const productData = req.body as IPRODUCTS;
+            const productData = req.body;
+            productData.imagePath=req.file?.filename
             const response = await this.productService.updateProduct(id as string,productData)
             if (response.status) {
               return res
