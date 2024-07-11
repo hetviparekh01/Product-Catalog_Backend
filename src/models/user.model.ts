@@ -22,6 +22,10 @@ const UserSchema = new mongoose.Schema({
         enum:['Admin','User'],
         required:[true,'Role is required']
     },
+    profileImage:{
+        type:String,
+        required:[true,'Profile Image is required']
+    }
 },{
     timestamps:true
 })
