@@ -6,6 +6,8 @@ import { IUser } from "../interfaces/IUser";
 import { ApiError } from "../utils/APIError";
 import { injectable } from "inversify";
 import { ObjectId } from "mongoose";
+import fs from 'fs';
+import path from 'path'
 @injectable()
 export class UserService {
     async signUp(userData: IUser) {
@@ -125,7 +127,16 @@ export class UserService {
     }
     async updateParticularUser(userId: ObjectId, userData: IUser) {
         try {
-            const response = await User.findByIdAndUpdate(userId, userData);
+             const user=await User.findById(userId);
+            if(user){
+                if(userData.profileImage){
+                    fs.unlink(path.join(__dirname,'..','..', 'public', 'uploads', `${user.profileImage}`),
+                    (err => {
+                        if (err) console.log(err);
+                    }));
+                }
+            }
+            const response = await User.findByIdAndUpdate(userId, {profileImage:userData.profileImage});
             if (response) {
                 return {
                     status: true,

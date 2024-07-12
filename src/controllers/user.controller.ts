@@ -114,7 +114,7 @@ export class AuthController {
         .json({ status: false, content: error.message });
     }
   }
-  @httpPut("/updateparticularuser",upload.single('profileImage'))
+  @httpPut("/updateparticularuser",TYPES.AuthMiddleware,upload.single('profileImage'))
   async updateParticularUser(req: Request, res: Response) {
     try {
       const userData = req.body;
@@ -132,7 +132,7 @@ export class AuthController {
       }
     } catch (error: any) {
       return res
-        .status(error.statusCode)
+        .status(error.statusCode||500)
         .json({ status: false, content: error.message });
     }
   }
