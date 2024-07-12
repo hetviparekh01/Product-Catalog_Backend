@@ -118,6 +118,26 @@ export class UserService {
         } catch (error: any) {
             return {
                 status: false,
+                statusCode: 500,
+                content: error.message,
+            };
+        }
+    }
+    async updateParticularUser(userId: ObjectId, userData: IUser) {
+        try {
+            const response = await User.findByIdAndUpdate(userId, userData);
+            if (response) {
+                return {
+                    status: true,
+                    statusCode: 200,
+                    content: "USER UPDATED SUCCESFULLY",
+                };
+            } else {
+                throw new ApiError(500, "ERROR IN UPDATING USER");
+            }
+        } catch (error: any) {
+            return {
+                status: false,
                 statusCode: error.statusCode || 500,
                 content: error.message,
             };

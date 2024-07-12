@@ -52,7 +52,7 @@ export class AuthController {
         .json({ status: false, content: error.message });
     }
   }
-  @httpPut("/updateuser")
+  @httpPut("/updateuser/:id")
   async updateUser(req: Request, res: Response) {
     try {
       const userData: IUser = req.body;
@@ -73,7 +73,7 @@ export class AuthController {
         .json({ status: false, content: error.message });
     }
   }
-  @httpDelete("deleteuser")
+  @httpDelete("/deleteuser/:id")
   async deleteUser(req: Request, res: Response) {
     try {
       const userId: string = req.params.id;
@@ -94,11 +94,33 @@ export class AuthController {
     }
   }
 
-  @httpGet("getparticularUser")
+  @httpGet("/getparticularuser",TYPES.AuthMiddleware)
   async getParticularUser(req: Request, res: Response) {
     try {
       const userId = req.user.userId;
-      const response = await this.userService.getParticularUser(userId);
+        const response = await this.userService.getParticularUser(userId);
+      if (response.status) {
+        return res
+          .status(response.statusCode)
+          .json({ status: response.status, content: response.content });
+      } else {
+        return res
+          .status(response.statusCode)
+          .json({ status: response.status, content: response.content });
+      }
+    } catch (error: any) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ status: false, content: error.message });
+    }
+  }
+  @httpPut("/updateparticularuser",upload.single('profileImage'))
+  async updateParticularUser(req: Request, res: Response) {
+    try {
+      const userData = req.body;
+      const userId = req.user.userId;
+      userData.profileImage=req.file?.filename
+      const response = await this.userService.updateParticularUser(userId, userData);
       if (response.status) {
         return res
           .status(response.statusCode)

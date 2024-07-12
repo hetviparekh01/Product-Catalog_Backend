@@ -107,7 +107,7 @@ export class CategoryController{
             }    
         } catch (error:any) {
             return res
-            .status(error.statusCode)
+            .status(error.statusCode||500)
             .json({ status: false, content: error.message });
         }
     }
